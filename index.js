@@ -6,12 +6,13 @@ const util = require('util')
 
 var nextUniqueID = 1 // concept borrowed from org.postgresql.core.v3.QueryExecutorImpl
 
-function Cursor (text, values, config) {
+function Cursor (text, values, config, types) {
   EventEmitter.call(this)
 
   this._conf = config || {}
   this.text = text
   this.values = values ? values.map(prepare) : null
+  this.types = types
   this.connection = null
   this._queue = []
   this.state = 'initialized'
@@ -30,7 +31,8 @@ Cursor.prototype.submit = function (connection) {
   const con = connection
 
   con.parse({
-    text: this.text
+    text: this.text,
+    types: this.types
   }, true)
 
   con.bind({
